@@ -15,7 +15,11 @@ NetworkManager *nm = new NetworkManager();
 NetworkManager *bicli = new NetworlManager();
 int main(int argc, char** argv){
 
-    nm.intrepret(fin);
+    nm.intrepret(graph_in.txt);
+    nm.print_all_e();
+    nm.print_all_v();
+
+
     /*check every nodes, whether their in_degree=out_degree or not*/
     Vertex *node = nm.get_all_nodes();
     vector<Vertex *> node_vlist;
@@ -56,29 +60,39 @@ int main(int argc, char** argv){
     vector<Edge *>::iterator min_path;
     float  cur_lentgh=0;
     float  min_len=10000;
-    
-
-    if(!outer.empty() && !inter.empty()){
+       
+    if(inter.size()!=outer.size()){
+         cout<<"Can't find answer on this graph";
+         return 0;//checker,the answer can be found only if inter number= outer number.
+    }
+    else if(!outer.empty() && !inter.empty()){
+//find the shortest path from each inter to each outer.
       for(int i=0;i<inter.size();i++){
          for(int j=0;j<outer.size();j++){
            cur_paths= cur_path.find_path(inter.at(i),outer.at(j));
+           cur_path.debug();
+           if(curpaths.at(0).size==0){
+              cout<<"This graph is not strongly connected"<<endl;
+              return 0; //checker
+           } 
            for(vector<vector<Edge *>>::iterator it_i=cur_paths.begin();it_i!=cur_paths.end();it_i++){
               for(vector<Edge *>::iterator i=it_i.begin();i!=it_i.end();i++){
-                 cur_length=cur_length+i->flowval;
+                 cur_length=cur_length +(i->flowval);
               }
               if(cur_length<min_len){
                  min_len=cur_length;
                  min_path=it_i
               }
            }
-          
+           
+           //as find the shortest path, add an edge which its weight(flowval)=the sum of the edges' weight
            bicli.add_switch(inter.at(i));
            blcli.add_switch(outer.at(j));
            bicli.connect(inter.at(i),outer.at(j));
            bicli.setlink(inter.at(i),outer.at(j),1,min_len);
            Edge *e= bicli.get_edge(inter.at(i),outer(j));
-           e->tag="notused";
-           choosed_paths.insert(pair<Edge *,vector<Edge *>>(e,*min_path))
+           e->tag="notused";//mark as notused, will be used later in matching part
+           choosed_paths.insert(pair<Edge *,vector<Edge *>>(e,*min_path))//record the relationship between edge in biclique and the orinal path
            cur_length=0;
            min_len=10000;
              
@@ -94,23 +108,27 @@ int main(int argc, char** argv){
     while(c_edge!=0){
        if((c_edge->flowval < min_edge->flowval)&&(c_edge->tag=="notused")&&(find(inter.begin(),inter.end(),c_edge->head->name)!=inter.end())&&(find(outer.begin(),outer.end(),c_edge->tail->name)!=inter.end()))
         {
-            min_edge=c_edge;
+            min_edge=c_edge;//greedy,find the edge with smallest value and connect 2 unmatched vertices.
         } 
     }
     choosed_edges.pushback(min_edge);
     inter.erase(min_edge->head->name);
-    outer.erase(min_edge->tail->name);
+    outer.erase(min_edge->tail->name);//erase from vectors for recording
    }
    
    for(vecter<Edge *>::iterator it_e=choosed_edges.begin();it_e!=choosed_edges.end();it_e++){
       for(vector<Edge *>::iterater p_it = choosed_paths[it_e].begin();p_it != choosed_paths[it_e].end();p_it++){
-         //copy every edges on the path in nm
+         nm.add_edge(p_it);//copy edges which will be walked twice to nm
       }
    }
-   
+   nm.print_all_e();
+ 
 
   }//end if  
-   
+  
+  //Find Euler circuit
+  queue<Edge *> walk_trace;//used for recording the path.
+     
     
-   return 0;
+  return 0;
 }
