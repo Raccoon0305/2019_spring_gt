@@ -7,6 +7,7 @@
 #include "path.h"
 #include <vector>
 #include <string>
+#include <queue>
 using namespace std;
 
 // create NetworkManager first
@@ -49,8 +50,9 @@ int main(int argc, char** argv){
 //outer(out_degree>in_degree).
     
     Path *cur_path=new Path();
+    cur_path.append(nm->elist);
     vector<vector<Edge *>> cur_paths;
-    map<string,vector<Edge *>> choosed_paths;
+    map<Edge *,vector<Edge *>> choosed_paths;
     vector<Edge *>::iterator min_path;
     float  cur_lentgh=0;
     float  min_len=10000;
@@ -69,17 +71,46 @@ int main(int argc, char** argv){
                  min_path=it_i
               }
            }
-           choosed_paths.insert(pair<string,vector<Edge *>>(inter.at(i),*min_path))
+          
            bicli.add_switch(inter.at(i));
            blcli.add_switch(outer.at(j));
            bicli.connect(inter.at(i),outer.at(j));
            bicli.setlink(inter.at(i),outer.at(j),1,min_len);
+           Edge *e= bicli.get_edge(inter.at(i),outer(j));
+           e->tag="notused";
+           choosed_paths.insert(pair<Edge *,vector<Edge *>>(e,*min_path))
            cur_length=0;
            min_len=10000;
              
          }   
       }
+    
+ // Matching 
+   Edge *c_edge = bicli->elist;
+   Edge *min_edge = c_edge;
+   vector<Edge *> choosed_edges;
+  // vector<Vertex *> matched_v;
+   while(!inter.empty&& !outer.empty){
+    while(c_edge!=0){
+       if((c_edge->flowval < min_edge->flowval)&&(c_edge->tag=="notused")&&(find(inter.begin(),inter.end(),c_edge->head->name)!=inter.end())&&(find(outer.begin(),outer.end(),c_edge->tail->name)!=inter.end()))
+        {
+            min_edge=c_edge;
+        } 
     }
-  
-    return 0;
+    choosed_edges.pushback(min_edge);
+    inter.erase(min_edge->head->name);
+    outer.erase(min_edge->tail->name);
+   }
+   
+   for(vecter<Edge *>::iterator it_e=choosed_edges.begin();it_e!=choosed_edges.end();it_e++){
+      for(vector<Edge *>::iterater p_it = choosed_paths[it_e].begin();p_it != choosed_paths[it_e].end();p_it++){
+         //copy every edges on the path in nm
+      }
+   }
+   
+
+  }//end if  
+   
+    
+   return 0;
 }
