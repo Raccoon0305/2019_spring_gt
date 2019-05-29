@@ -15,9 +15,9 @@ NetworkManager *nm = new NetworkManager();
 NetworkManager *bicli = new NetworlManager();
 int main(int argc, char** argv){
 
-    nm.intrepret(graph_in.txt);
-    nm.print_all_e();
-    nm.print_all_v();
+    nm->intrepret(graph_in.txt);
+    nm->print_all_e();
+    nm->print_all_v();
 
 
     /*check every nodes, whether their in_degree=out_degree or not*/
@@ -35,8 +35,8 @@ int main(int argc, char** argv){
     for(int i=0;i<node_vlist.size();i++){
        for(int j=0;j<node_vlist.size();j++){
           if(i!=j){
-             if(nm.connected_d(node_vlist[i]->name,node_vlist[j]->name){c_out_d++;}
-             if(nm.connected_d(node_vlist[j]->name,node_vlist[i]->name){c_in_d++;}   
+             if(nm->connected_d(node_vlist[i]->name,node_vlist[j]->name){c_out_d++;}
+             if(nm->connected_d(node_vlist[j]->name,node_vlist[i]->name){c_in_d++;}   
           }
        }
        in_degree.pushback(c_in_d);
@@ -86,11 +86,11 @@ int main(int argc, char** argv){
            }
            
            //as find the shortest path, add an edge which its weight(flowval)=the sum of the edges' weight
-           bicli.add_switch(inter.at(i));
-           blcli.add_switch(outer.at(j));
-           bicli.connect(inter.at(i),outer.at(j));
-           bicli.setlink(inter.at(i),outer.at(j),1,min_len);
-           Edge *e= bicli.get_edge(inter.at(i),outer(j));
+           bicli->add_switch(inter.at(i));
+           blcli->add_switch(outer.at(j));
+           bicli->connect(inter.at(i),outer.at(j));
+           bicli->setlink(inter.at(i),outer.at(j),1,min_len);
+           Edge *e= bicli->get_edge(inter.at(i),outer(j));
            e->tag="notused";//mark as notused, will be used later in matching part
            choosed_paths.insert(pair<Edge *,vector<Edge *>>(e,*min_path))//record the relationship between edge in biclique and the orinal path
            cur_length=0;
@@ -116,16 +116,16 @@ int main(int argc, char** argv){
     outer.erase(min_edge->tail->name);//erase from vectors for recording
    }
    
-   for(vecter<Edge *>::iterator it_e=choosed_edges.begin();it_e!=choosed_edges.end();it_e++){
-      for(vector<Edge *>::iterater p_it = choosed_paths[it_e].begin();p_it != choosed_paths[it_e].end();p_it++){
-         nm.add_edge(p_it);//copy edges which will be walked twice to nm
+   for(vector<Edge *>::iterator it_e=choosed_edges.begin();it_e!=choosed_edges.end();it_e++){
+	      for(vector<Edge *>::iterater p_it = choosed_paths[it_e].begin();p_it != choosed_paths[it_e].end();p_it++){
+		 nm->add_edge(p_it);//copy edges which will be walked twice to nm
       }
    }
-   nm.print_all_e();
+   
  
 
   }//end if  
-  
+  nm->print_all_e();  
   //Find Euler circuit
   queue<Edge *> walk_trace;//used for recording the path.
   //Use Heirholzer algorithm to solve
