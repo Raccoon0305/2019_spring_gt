@@ -1,0 +1,10 @@
+Euler graph:
+a cap:100 flow:1b
+b cap:100 flow:2c
+e cap:100 flow:1b
+c cap:100 flow:1a
+e cap:100 flow:1c
+d cap:100 flow:2e
+c cap:100 flow:2d
+e cap:100 flow:1f
+f cap:100 flow:1e

@@ -26,6 +26,7 @@ int main(int argc, char** argv){
     vector<Vertex *> node_vlist;
     vector<int> in_degree,out_degree;
     Vertex *current=node;
+    int num_to_match=0;
    
     while(current!=0){
        node_vlist.push_back(current);
@@ -47,8 +48,14 @@ int main(int argc, char** argv){
     }
     vector<string> outer,inter;
     for(int i=0;i!=in_degree.size();i++){
-       if(in_degree.at(i)>out_degree.at(i)){inter.push_back(node_vlist.at(i)->name);}
-       else if(in_degree.at(i)<out_degree.at(i)){outer.push_back(node_vlist.at(i)->name);}
+       if(in_degree.at(i)>out_degree.at(i)){
+            inter.push_back(node_vlist.at(i)->name);
+            num_to_match++; 
+       }
+       else if(in_degree.at(i)<out_degree.at(i)){
+            outer.push_back(node_vlist.at(i)->name);
+            num_to_match++;
+       }
     }
  
 //Build a biclique graph which all the edges of it present the minimun length from a inter(in_degree>out_degree) to an 
@@ -99,26 +106,33 @@ int main(int argc, char** argv){
            min_len=10000;
              
          }   
-      }
-  // bicli->print_all_e(); 
+      }   
+   in_degree.clear();
+   out_degree.clear();
+     
+//   bicli->print_all_e();
+   
  // Matching 
+    
    Edge *c_edge = bicli-> elist;
    Edge *min_edge = c_edge;   
    vector<Edge *> choosed_edges;
    vector<string> matched_v;
-    
-   while((matched_v.size()/2)!=inter.size()){
-    
+   cout<<num_to_match<<endl;
+   while(num_to_match!=0){
     while(c_edge!=NULL){
+       cout<<"go"<<endl;
        if((c_edge->cap < min_edge->cap)&&(find(matched_v.begin(),matched_v.end(),c_edge->head->name)==matched_v.end())&&(find(matched_v.begin(),matched_v.end(),c_edge->tail->name)==matched_v.end()))
         {
             min_edge=c_edge;//greedy,find the edge with smallest value and connect 2 unmatched vertices.
-        } 
+        }
+        c_edge=c_edge->next; 
     }
     choosed_edges.push_back(min_edge);
     min_edge->flowval=0;
     matched_v.push_back(min_edge->head->name);
     matched_v.push_back(min_edge->tail->name);//Record matched vertex in the matched_v
+    num_to_match=num_to_match-2;
    }
    
    for(int i=0;i<choosed_edges.size();i++){
@@ -147,6 +161,7 @@ int main(int argc, char** argv){
   Edge *start = nm->elist;
   while(start!=NULL){
     outfile<<start->head->name<<" cap:"<<start->cap<<" flow:"<<start->flowval<<start->tail->name<<endl;
+    start=start->next;
   }
   outfile.close(); 
  // Edge *factor=nm->elist;
