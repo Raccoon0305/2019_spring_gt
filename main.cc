@@ -128,7 +128,12 @@ int main(int argc, char** argv){
   
   //Find Euler circuit
   queue<Edge *> walk_trace;//used for recording the path.
-     
+  //Use Heirholzer algorithm to solve
+  
+  
+  Edge *factor=nm->elist;
+  
+    
     
   return 0;
 }
