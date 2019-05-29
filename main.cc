@@ -17,8 +17,8 @@ NetworkManager *bicli = new NetworkManager();
 int main(int argc, char** argv){
 
     nm->interpret("graph_in.txt");
-    nm->print_all_e();
-    nm->print_all_v();
+   // nm->print_all_e();
+   // nm->print_all_v();
 
 
     /*check every nodes, whether their in_degree=out_degree or not*/
@@ -70,7 +70,7 @@ int main(int argc, char** argv){
 //find the shortest path from each inter to each outer.
       for(int i=0;i<inter.size();i++){
          for(int j=0;j<outer.size();j++){
-           cur_paths= cur_path->find_paths(inter.at(i),outer.at(j));
+           cur_paths= cur_path->find_paths(outer.at(j),inter.at(i));
            cur_path->debug();
            if(cur_paths.at(0).size()==0){
               cout<<"This graph is not strongly connected"<<endl;
@@ -78,7 +78,7 @@ int main(int argc, char** argv){
            } 
            for(int k=0;k<cur_paths.size();k++){
               for(int l=0;l<cur_paths.at(k).size();l++){
-                 cur_length=cur_length +(cur_paths.at(k).at(l))->flowval;
+                 cur_length=cur_length +(cur_paths.at(k).at(l))->cap;
               }
               if(cur_length<min_len){
                  min_len=cur_length;
@@ -89,50 +89,67 @@ int main(int argc, char** argv){
            //as find the shortest path, add an edge which its weight(flowval)=the sum of the edges' weight
            bicli->add_switch(inter.at(i));
            bicli->add_switch(outer.at(j));
-           bicli->connect(inter.at(i),outer.at(j));
-           bicli->setlink(inter.at(i),outer.at(j),1,min_len);
-           Edge *e= bicli->get_edge(inter.at(i),outer.at(j));
-           e->tag="notused";//mark as notused, will be used later in matching part
+           bicli->connect(outer.at(j),inter.at(i));
+           bicli->setlink(outer.at(i),inter.at(i),0,min_len);
+           bicli->setlink(outer.at(i),inter.at(i),1,1);
+           Edge *e= bicli->get_edge(outer.at(j),inter.at(i));
+           
            choosed_paths.insert(pair<Edge *,vector<Edge *>>(e,cur_paths.at(min_path)));//record the relationship between edge in biclique and the orinal path
            cur_length=0;
            min_len=10000;
              
          }   
       }
-    
+  // bicli->print_all_e(); 
  // Matching 
-   Edge *c_edge = bicli->elist;
-   Edge *min_edge = c_edge;
+   Edge *c_edge = bicli-> elist;
+   Edge *min_edge = c_edge;   
    vector<Edge *> choosed_edges;
    vector<string> matched_v;
-   while(!inter.empty()&& !outer.empty()){
-    while(c_edge!=0){
-       if((c_edge->flowval < min_edge->flowval)&&(c_edge->tag=="notused")&&!(find(matched_v.begin(),matched_v.end(),c_edge->head->name)!=matched_v.end())&&!(find(matched_v.begin(),matched_v.end(),c_edge->tail->name)!=matched_v.end()))
+    
+   while((matched_v.size()/2)!=inter.size()){
+    
+    while(c_edge!=NULL){
+       if((c_edge->cap < min_edge->cap)&&(find(matched_v.begin(),matched_v.end(),c_edge->head->name)==matched_v.end())&&(find(matched_v.begin(),matched_v.end(),c_edge->tail->name)==matched_v.end()))
         {
             min_edge=c_edge;//greedy,find the edge with smallest value and connect 2 unmatched vertices.
         } 
     }
     choosed_edges.push_back(min_edge);
+    min_edge->flowval=0;
     matched_v.push_back(min_edge->head->name);
     matched_v.push_back(min_edge->tail->name);//Record matched vertex in the matched_v
    }
    
    for(int i=0;i<choosed_edges.size();i++){
 	      for(int j=0;j<choosed_paths[choosed_edges.at(i)].size();j++){
-		 nm->add_edge(choosed_paths[choosed_edges.at(i)].at(j));//copy edges which will be walked twice to nm
+		 nm->setlink(choosed_paths[choosed_edges.at(i)].at(j)->head->name,choosed_paths[choosed_edges.at(i)].at(j)->tail->name,1,choosed_paths[choosed_edges.at(i)].at(j)->flowval+1);//copy edges which will be walked twice to nm
       }
    }
    
  
 
   }//end if  
+  
   nm->print_all_e();  
+   
+  Gplot *plot = new Gplot();
+  plot->gp_add(nm->elist);
+  plot->gp_dump(true);
+  plot->gp_export("plot");  
   //Find Euler circuit
   queue<Edge *> walk_trace;//used for recording the path.
   //Use Heirholzer algorithm to solve
   
-  
-  Edge *factor=nm->elist;
+  ofstream outfile;
+  outfile.open("output.txt");
+  outfile<<"Euler graph:"<<endl;
+  Edge *start = nm->elist;
+  while(start!=NULL){
+    outfile<<start->head->name<<" cap:"<<start->cap<<" flow:"<<start->flowval<<start->tail->name<<endl;
+  }
+  outfile.close(); 
+ // Edge *factor=nm->elist;
   
     
     
