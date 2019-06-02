@@ -8,12 +8,15 @@
 #include <vector>
 #include <map>
 #include <string>
-#include <queue>
+#include <stack>
 using namespace std;
 
 // create NetworkManager first
 NetworkManager *nm = new NetworkManager();
 NetworkManager *bicli = new NetworkManager();
+stack<string> trace;
+vector<Vertex *> node_vlist;
+void dfs_walk(string start_v);
 int main(int argc, char** argv){
 
     nm->interpret("graph_in.txt");
@@ -23,7 +26,6 @@ int main(int argc, char** argv){
 
     /*check every nodes, whether their in_degree=out_degree or not*/
     Vertex *node = nm->get_all_nodes();
-    vector<Vertex *> node_vlist;
     vector<int> in_degree,out_degree;
     Vertex *current=node;
     int num_to_match=0;
@@ -118,10 +120,8 @@ int main(int argc, char** argv){
    Edge *min_edge = c_edge;   
    vector<Edge *> choosed_edges;
    vector<string> matched_v;
-   cout<<num_to_match<<endl;
    while(num_to_match!=0){
     while(c_edge!=NULL){
-       cout<<"go"<<endl;
        if((c_edge->cap < min_edge->cap)&&(find(matched_v.begin(),matched_v.end(),c_edge->head->name)==matched_v.end())&&(find(matched_v.begin(),matched_v.end(),c_edge->tail->name)==matched_v.end()))
         {
             min_edge=c_edge;//greedy,find the edge with smallest value and connect 2 unmatched vertices.
@@ -144,29 +144,58 @@ int main(int argc, char** argv){
  
 
   }//end if  
-  
-  nm->print_all_e();  
    
+  nm->print_all_e();  
+  /* 
   Gplot *plot = new Gplot();
   plot->gp_add(nm->elist);
   plot->gp_dump(true);
   plot->gp_export("plot");  
-  //Find Euler circuit
-  queue<Edge *> walk_trace;//used for recording the path.
-  //Use Heirholzer algorithm to solve
   
+  
+    //Use Heirholzer algorithm to solve
+  */ 
+  Edge *el = new Edge();
+  el =  nm->elist;
+  string start = el->head->name;
+  cout<<start;  
+  dfs_walk(start);
+   
+  /* 
   ofstream outfile;
   outfile.open("output.txt");
-  outfile<<"Euler graph:"<<endl;
-  Edge *start = nm->elist;
-  while(start!=NULL){
-    outfile<<start->head->name<<" cap:"<<start->cap<<" flow:"<<start->flowval<<start->tail->name<<endl;
-    start=start->next;
+  while(!trace.empty()){
+    outfile<<trace.top()<<"->";
+    trace.pop();
   }
+  outfile<<start;
   outfile.close(); 
- // Edge *factor=nm->elist;
   
+  */
     
     
   return 0;
 }
+void dfs_walk(string start_v){
+    
+   
+   Edge *c_e=new Edge();
+   for(int i=0;i<node_vlist.size();i++){
+          
+     if((node_vlist.at(i)->name!=start_v)&&(nm->connected_d(start_v,node_vlist.at(i)->name))){
+       c_e =nm->get_edge(start_v,node_vlist.at(i)->name);
+       
+       if(c_e->flowval != 0){
+           
+          nm->setlink(start_v,node_vlist.at(i)->name,1,c_e->flowval-1);
+          dfs_walk(node_vlist.at(i)->name);
+       }
+     }
+     
+   }
+   
+   trace.push(start_v);
+   return;
+}
+
+
