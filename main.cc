@@ -1,4 +1,4 @@
-/* 
+/*
     Your main program goes here
 */
 #include <iostream>
@@ -7,16 +7,14 @@
 #include "path.h"
 #include <vector>
 #include <map>
-#include <string>
 #include <stack>
+#include <string>
 using namespace std;
 
 // create NetworkManager first
 NetworkManager *nm = new NetworkManager();
 NetworkManager *bicli = new NetworkManager();
-stack<string> trace;
-vector<Vertex *> node_vlist;
-void dfs_walk(string start_v);
+
 int main(int argc, char** argv){
 
     nm->interpret("graph_in.txt");
@@ -29,7 +27,9 @@ int main(int argc, char** argv){
     vector<int> in_degree,out_degree;
     Vertex *current=node;
     int num_to_match=0;
-   
+    vector<string> trace;
+    vector<Vertex *> node_vlist;
+
     while(current!=0){
        node_vlist.push_back(current);
        current=current->next;
@@ -99,8 +99,8 @@ int main(int argc, char** argv){
            bicli->add_switch(inter.at(i));
            bicli->add_switch(outer.at(j));
            bicli->connect(outer.at(j),inter.at(i));
-           bicli->setlink(outer.at(i),inter.at(i),0,min_len);
-           bicli->setlink(outer.at(i),inter.at(i),1,1);
+           bicli->setlink(outer.at(j),inter.at(i),0,min_len);
+           bicli->setlink(outer.at(j),inter.at(i),1,1);
            Edge *e= bicli->get_edge(outer.at(j),inter.at(i));
            
            choosed_paths.insert(pair<Edge *,vector<Edge *>>(e,cur_paths.at(min_path)));//record the relationship between edge in biclique and the orinal path
@@ -141,7 +141,9 @@ int main(int argc, char** argv){
       }
    }
    
- 
+  choosed_edges.clear();
+  matched_v.clear();
+
 
   }//end if  
    
@@ -151,51 +153,77 @@ int main(int argc, char** argv){
   plot->gp_add(nm->elist);
   plot->gp_dump(true);
   plot->gp_export("plot");  
-  
+  */
+  inter.clear();
+  outer.clear();
+    
   
     //Use Heirholzer algorithm to solve
-  */ 
-  Edge *el = new Edge();
-  el =  nm->elist;
-  string start = el->head->name;
-  cout<<start;  
-  dfs_walk(start);
    
-  /* 
+  Edge *el = nm->elist;
+  string start = el->head->name;
+  
+   
+  
+  Vertex *v_start = node;
+  string c_v;
+  stack<string> S;
+  S.push(start);
+  Vertex *current_v = v_start;
+  Edge *e_c;
+  bool dead = 1;  
+ //////////////////////////////////////////////////////////////////////////////////////////////////
+
+  while(!S.empty()){
+        
+	c_v = S.top();
+	while(current_v!=NULL){
+          if((c_v != current_v->name)&&(e_c = nm->get_edge(c_v,current_v->name))&&(e_c->flowval>0)){           
+              
+              
+            
+                nm->setlink(c_v,current_v->name,1,e_c->flowval-1);
+                S.push(current_v->name);
+                dead = 0;                   
+                break;
+              
+           }
+                       
+           current_v = current_v->next;
+         }
+         if(dead){
+           trace.push_back(S.top());
+           S.pop();
+           
+         }
+         else
+           dead = 1; 
+         current_v = v_start ;  
+ }    
+  
+   
+  //print out the result 
   ofstream outfile;
   outfile.open("output.txt");
+  bool check_it = 1;
+  if(trace.back()==start){check_it = 0;}
+  string last_node=trace.back();
+  trace.pop_back();
+  
   while(!trace.empty()){
-    outfile<<trace.top()<<"->";
-    trace.pop();
+    outfile<<last_node<<"->"<<trace.back()<<endl;
+    last_node = trace.back();
+    trace.pop_back();
+    
   }
-  outfile<<start;
+  if(check_it){outfile<<last_node<<"->"<<start<<endl;}
   outfile.close(); 
   
-  */
+  
     
     
   return 0;
 }
-void dfs_walk(string start_v){
-    
-   
-   Edge *c_e=new Edge();
-   for(int i=0;i<node_vlist.size();i++){
-          
-     if((node_vlist.at(i)->name!=start_v)&&(nm->connected_d(start_v,node_vlist.at(i)->name))){
-       c_e =nm->get_edge(start_v,node_vlist.at(i)->name);
-       
-       if(c_e->flowval != 0){
-           
-          nm->setlink(start_v,node_vlist.at(i)->name,1,c_e->flowval-1);
-          dfs_walk(node_vlist.at(i)->name);
-       }
-     }
-     
-   }
-   
-   trace.push(start_v);
-   return;
-}
+
 
 
