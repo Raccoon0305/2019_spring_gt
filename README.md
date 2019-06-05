@@ -1,5 +1,15 @@
 # DCPM
 Directed Chinese Post Man:
+
+Description:
+1. This program is for directed graph.
+2. This program considers the shortest path, this is presented mainly on finding which edges are going to be walked twice.
+   The input graph can have weights on edges, but it also accept unweighted ones, just give every edge an identical weight value.
+3. About the standard input of this program: Each line presents an edge,
+   format: (head, tail, weight, capability(always be 1 if simple graph))
+   a b 100 1 
+   example like graph_in.txt
+   
 Method:
 1. Find out vertices whose indegree is not equal to out degree
 2. Find the shortest path from each inter to each outer
@@ -11,6 +21,4 @@ For graph input:
 flowval: Present the available walk an edge can be taken.
 capability: Present the weight.
 
-recently:
-1. Complete the final part of the program.
 
