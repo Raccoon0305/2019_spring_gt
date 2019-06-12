@@ -9,6 +9,8 @@ Description:
    format: (head, tail, weight, capability(always be 1 if simple graph))
    a b 100 1 
    example like graph_in.txt
+4. Start point is the head of the first edge in .txt
+   example, a is the start point amd at the end we must go back to it in graph_in.txt
    
 Method:
 1. Find out vertices whose indegree is not equal to out degree
